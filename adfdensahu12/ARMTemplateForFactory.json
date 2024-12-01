@@ -305,6 +305,140 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_LookupActivity')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DueCount",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT COUNT(C.Phone) AS TotalDueCount\nFROM [SalesLT].[SalesOrderHeader] SOH\nINNER JOIN [SalesLT].[Customer] C\nON C.CustomerId = SOH.CustomerId\nWHERE SOH.TotalDue >= 1000",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "AzureSqlScript",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "IF-CheckCountGreater1000",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "DueCount",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('DueCount').output.firstRow.TotalDueCount, 1)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": "SELECT C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone, SUM(SOH.TotalDue) AS TotalDue\nFROM [SalesLT].[SalesOrderHeader] SOH\nINNER JOIN [SalesLT].[Customer] C\nON C.CustomerId = SOH.CustomerId\nWHERE SOH.TotalDue >= 1000\nGROUP BY C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "AzureSqlScript",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DelimitedText",
+											"type": "DatasetReference",
+											"parameters": {
+												"SubDir": {
+													"value": "@variables('OutputFileDirectory')",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@concat('CustomerDueDetails_',utcNow(),'.csv')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"OutputFileDirectory": {
+						"type": "String",
+						"defaultValue": "CustomerData"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AzureSqlScript')]",
+				"[concat(variables('factoryId'), '/datasets/DelimitedText')]"
+			]
 		}
 	]
 }
