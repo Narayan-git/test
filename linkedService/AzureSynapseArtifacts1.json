@@ -1,0 +1,12 @@
+{
+	"name": "AzureSynapseArtifacts1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSynapseArtifacts",
+		"typeProperties": {
+			"endpoint": "https://nsahu12ws.dev.azuresynapse.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/28e1e42a-4438-4c30-9a5f-7d7b488fd883/resourceGroups/1-6a5522be-playground-sandbox/providers/Microsoft.Synapse/workspaces/nsahu12ws"
+		}
+	}
+}
