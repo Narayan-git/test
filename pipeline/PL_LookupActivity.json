@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "SELECT COUNT(C.Phone) AS TotalDueCount\nFROM [SalesLT].[SalesOrderHeader] SOH\nINNER JOIN [SalesLT].[Customer] C\nON C.CustomerId = SOH.CustomerId\nWHERE SOH.TotalDue >= 1000",
+						"sqlReaderQuery": {
+							"value": "@SELECT COUNT(C.Phone) AS TotalDueCount\nFROM [SalesLT].[SalesOrderHeader] SOH\nINNER JOIN [SalesLT].[Customer] C\nON C.CustomerId = SOH.CustomerId\nWHERE SOH.TotalDue >= {variables('MinimumDueAmmount')}",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -60,7 +63,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "SELECT C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone, SUM(SOH.TotalDue) AS TotalDue\nFROM [SalesLT].[SalesOrderHeader] SOH\nINNER JOIN [SalesLT].[Customer] C\nON C.CustomerId = SOH.CustomerId\nWHERE SOH.TotalDue >= 1000\nGROUP BY C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone",
+									"sqlReaderQuery": {
+										"value": "@SELECT C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone, SUM(SOH.TotalDue) AS TotalDue\nFROM [SalesLT].[SalesOrderHeader] SOH\nINNER JOIN [SalesLT].[Customer] C\nON C.CustomerId = SOH.CustomerId\nWHERE SOH.TotalDue >= {variables('MinimumDueAmmount')}\nGROUP BY C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -116,6 +122,10 @@
 			"OutputFileDirectory": {
 				"type": "String",
 				"defaultValue": "CustomerData"
+			},
+			"MinimumDueAmmount": {
+				"type": "Integer",
+				"defaultValue": 5000
 			}
 		},
 		"annotations": []
