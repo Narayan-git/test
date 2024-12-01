@@ -1,0 +1,9 @@
+{
+	"name": "secondADFnsahu",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "3f581081-f151-4355-877e-6d8be4d7ed13",
+		"tenantId": "84f1e4ea-8554-43e1-8709-f0b8589ea118"
+	}
+}
