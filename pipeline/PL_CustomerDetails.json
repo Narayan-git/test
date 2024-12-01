@@ -1,0 +1,86 @@
+{
+	"name": "PL_CustomerDetails",
+	"properties": {
+		"activities": [
+			{
+				"name": "CD-CustomerDetails",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT C.FirstNAme, C.FirstName, C.MiddleName, C.LastName, C.CompanyName, C.EmailAddress, C.Phone,\nA.City, A.StateProvince, A.CountryRegion, A.PostalCode\nFROM [SalesLT].[Customer] C\nINNER JOIN [SalesLT].[CustomerAddress] CA\nON C.CustomerId = CA.CustomerId\nINNER JOIN [SalesLT].[Address] A\nON CA.AddressID = A.AddressID",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "PreserveHierarchy"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "AzureBlobStorage",
+								"type": "LinkedServiceReference"
+							},
+							"path": "practice"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSqlScript",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DelimitedText",
+						"type": "DatasetReference",
+						"parameters": {
+							"SubDir": "CustomerData",
+							"FileName": {
+								"value": "@concat('CustomerDetails_', utcNow(), '.csv')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2024-12-01T13:45:39Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

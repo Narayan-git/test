@@ -1,0 +1,36 @@
+{
+	"name": "Binary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SubDir": {
+				"type": "string",
+				"defaultValue": "test"
+			},
+			"FileName": {
+				"type": "string",
+				"defaultValue": "ExportData.csv"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().FileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().SubDir",
+					"type": "Expression"
+				},
+				"container": "practice"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
